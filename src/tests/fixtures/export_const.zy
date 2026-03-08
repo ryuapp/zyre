@@ -1,0 +1,9 @@
+const std = import("std")
+
+const a = 2
+const b = 3
+export const c = a * b
+
+fn main(): void {
+    std.debug.print(c)
+}

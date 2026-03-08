@@ -1,0 +1,13 @@
+const std = import("std")
+
+fn check(n: i32): void {
+    switch n {
+        1 => std.debug.print("one"),
+        2 => std.debug.print("two"),
+        else => std.debug.print("other"),
+    }
+}
+
+fn main(): void {
+    check(1)
+}

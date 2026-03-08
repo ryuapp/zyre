@@ -1,0 +1,16 @@
+const std = import("std")
+
+const Direction = enum { North, South, East, West }
+
+fn describe(d: Direction): void {
+    switch d {
+        North => std.debug.print("north"),
+        South => std.debug.print("south"),
+        East => std.debug.print("east"),
+        West => std.debug.print("west"),
+    }
+}
+
+fn main(): void {
+    std.debug.print("ok")
+}

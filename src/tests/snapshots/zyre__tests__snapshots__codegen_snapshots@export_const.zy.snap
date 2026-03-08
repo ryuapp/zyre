@@ -1,0 +1,27 @@
+---
+source: src/tests/snapshots.rs
+expression: output
+input_file: src/tests/fixtures/export_const.zy
+---
+const std = @import("std");
+
+fn __zyre_print(val: anytype) void {
+    if (comptime @typeInfo(@TypeOf(val)) == .pointer) {
+        std.debug.print("{s}\n", .{val});
+    } else {
+        std.debug.print("{}\n", .{val});
+    }
+}
+
+const a = 2;
+const b = 3;
+pub const c = (a * b);
+
+pub fn main() !void {
+    var __zyre_arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer __zyre_arena.deinit();
+    const __zyre_allocator = __zyre_arena.allocator();
+    _ = __zyre_allocator;
+
+    __zyre_print(c);
+}

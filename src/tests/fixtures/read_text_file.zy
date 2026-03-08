@@ -1,0 +1,8 @@
+const std = import("std")
+
+fn main(): void {
+    const data = std.fs.readTextFile("file.txt") catch _err {
+        return
+    }
+    std.debug.print(data)
+}

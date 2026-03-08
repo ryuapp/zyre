@@ -1,0 +1,8 @@
+---
+source: src/tests/snapshots.rs
+expression: output
+input_file: src/tests/fixtures/no_std.zy
+---
+pub fn add(a: i32, b: i32) i32 {
+    return (a + b);
+}

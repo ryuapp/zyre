@@ -1,0 +1,17 @@
+const std = import("std");
+
+fn label(n: i32): string {
+    return switch n {
+        1 => "one",
+        2 => "two",
+        3 => "three",
+        else => "other",
+    };
+}
+
+fn main(): void {
+    std.debug.print(label(1));
+    std.debug.print(label(2));
+    std.debug.print(label(3));
+    std.debug.print(label(99));
+}

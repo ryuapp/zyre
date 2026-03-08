@@ -1,0 +1,39 @@
+---
+source: src/tests/snapshots.rs
+expression: output
+input_file: src/tests/fixtures/enum_decl.zy
+---
+const std = @import("std");
+
+fn __zyre_print(val: anytype) void {
+    if (comptime @typeInfo(@TypeOf(val)) == .pointer) {
+        std.debug.print("{s}\n", .{val});
+    } else {
+        std.debug.print("{}\n", .{val});
+    }
+}
+
+const Direction = enum {
+    North,
+    South,
+    East,
+    West,
+};
+
+fn describe(d: Direction) void {
+    switch (d) {
+    .North => __zyre_print("north"),
+    .South => __zyre_print("south"),
+    .East => __zyre_print("east"),
+    .West => __zyre_print("west"),
+}
+}
+
+pub fn main() !void {
+    var __zyre_arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer __zyre_arena.deinit();
+    const __zyre_allocator = __zyre_arena.allocator();
+    _ = __zyre_allocator;
+
+    __zyre_print("ok");
+}

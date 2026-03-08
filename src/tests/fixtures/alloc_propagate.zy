@@ -1,0 +1,10 @@
+const std = import("std")
+
+fn readIt(): !string {
+    return std.fs.readTextFile("x.txt")?
+}
+
+fn main(): void {
+    const data = readIt() catch _err { return }
+    std.debug.print(data)
+}

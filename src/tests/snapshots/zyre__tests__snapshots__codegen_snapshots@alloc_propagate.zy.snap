@@ -1,0 +1,29 @@
+---
+source: src/tests/snapshots.rs
+expression: output
+input_file: src/tests/fixtures/alloc_propagate.zy
+---
+const std = @import("std");
+
+fn __zyre_print(val: anytype) void {
+    if (comptime @typeInfo(@TypeOf(val)) == .pointer) {
+        std.debug.print("{s}\n", .{val});
+    } else {
+        std.debug.print("{}\n", .{val});
+    }
+}
+
+fn readIt(__zyre_allocator: std.mem.Allocator) ![]const u8 {
+    return (try std.fs.cwd().readFileAlloc(__zyre_allocator, "x.txt", std.math.maxInt(usize)));
+}
+
+pub fn main() !void {
+    var __zyre_arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer __zyre_arena.deinit();
+    const __zyre_allocator = __zyre_arena.allocator();
+
+    const data = readIt(__zyre_allocator) catch {
+    return;
+};
+    __zyre_print(data);
+}

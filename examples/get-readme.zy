@@ -1,0 +1,15 @@
+const std = import("std")
+const fs = std.fs
+
+fn getReadme(filename: string): !string {
+    const data = fs.readTextFile(filename)?;
+    return data
+}
+
+fn main(): void {
+    const data = getReadme("README.md") catch err {
+        std.debug.print(err)
+        return
+    }
+    std.debug.print(data)
+}

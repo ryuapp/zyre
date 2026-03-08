@@ -1,0 +1,13 @@
+[package]
+name = "zyre"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "zyre"
+path = "src/main.rs"
+
+[dependencies]
+
+[dev-dependencies]
+insta = { version = "1", features = ["glob"] }

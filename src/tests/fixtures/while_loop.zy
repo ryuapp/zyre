@@ -1,0 +1,9 @@
+const std = import("std")
+
+fn main(): void {
+    const x = true
+    while x {
+        std.debug.print("loop")
+        break
+    }
+}

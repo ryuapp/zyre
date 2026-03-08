@@ -1,0 +1,11 @@
+const std = import("std")
+
+const Point = struct { x: i32, y: i32 }
+
+fn getX(p: Point): i32 {
+    return p.x
+}
+
+fn main(): void {
+    std.debug.print("ok")
+}
