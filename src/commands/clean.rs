@@ -14,7 +14,11 @@ pub fn run() {
             Err(e) => panic!("Failed to remove {}: {}", dir, e),
         }
     }
-    eprintln!("Removed {} files, {}", file_count, format_bytes(total_bytes));
+    eprintln!(
+        "Removed {} files, {}",
+        file_count,
+        format_bytes(total_bytes)
+    );
 }
 
 fn walk_dir_stats(dir: &Path) -> (usize, u64) {
