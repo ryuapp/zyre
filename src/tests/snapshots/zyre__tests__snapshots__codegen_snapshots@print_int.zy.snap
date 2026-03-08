@@ -1,9 +1,11 @@
 ---
 source: src/tests/snapshots.rs
+assertion_line: 10
 expression: output
 input_file: src/tests/fixtures/print_int.zy
 ---
 const std = @import("std");
+const __zyre_runtime = @import("zyre_runtime.zig");
 
 fn __zyre_print(val: anytype) void {
     if (comptime @typeInfo(@TypeOf(val)) == .pointer) {
@@ -14,6 +16,8 @@ fn __zyre_print(val: anytype) void {
 }
 
 pub fn main() !void {
+    try __zyre_runtime.Output.init();
+    defer __zyre_runtime.Output.restore();
     var __zyre_arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer __zyre_arena.deinit();
     const __zyre_allocator = __zyre_arena.allocator();

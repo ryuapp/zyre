@@ -208,6 +208,7 @@ impl ZigBackend {
         let mut out = String::new();
         if needs_std {
             out.push_str("const std = @import(\"std\");\n");
+            out.push_str("const __zyre_runtime = @import(\"zyre_runtime.zig\");\n");
         }
         for (name, path) in &user_imports {
             out.push_str(&format!("const {} = @import(\"{}\");\n", name, path));
@@ -291,6 +292,8 @@ impl ZigBackend {
         if !body_stmts.is_empty() && !has_explicit_main {
             let needs_alloc = self.uses_allocator(&body_stmts);
             out.push_str("pub fn main() !void {\n");
+            out.push_str("    try __zyre_runtime.Output.init();\n");
+            out.push_str("    defer __zyre_runtime.Output.restore();\n");
             out.push_str(&Self::gen_arena_setup(needs_alloc));
             for stmt in &body_stmts {
                 out.push_str(&self.gen_stmt(stmt, 1));
@@ -350,6 +353,8 @@ impl ZigBackend {
         let mut out = format!("{}fn {}({}) {} {{\n", pub_prefix, f.name, params_str, ret);
 
         if f.name == "main" {
+            out.push_str("    try __zyre_runtime.Output.init();\n");
+            out.push_str("    defer __zyre_runtime.Output.restore();\n");
             out.push_str(&Self::gen_arena_setup(needs_alloc));
         }
 

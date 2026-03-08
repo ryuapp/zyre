@@ -70,9 +70,13 @@ pub fn collect_zy_imports(
     result
 }
 
+const ZYRE_RUNTIME: &str = include_str!("../runtime/zyre_runtime.zig");
+
 /// Generates a .zig file in the cache from a pre-parsed AST. Returns (stem, zig_path).
 pub fn emit_zig(input_path: &str, ast: &crate::parser::Program) -> (String, String) {
     std::fs::create_dir_all("zyre-cache").unwrap();
+    std::fs::write("zyre-cache/zyre_runtime.zig", ZYRE_RUNTIME)
+        .unwrap_or_else(|e| panic!("Failed to write zyre_runtime.zig: {}", e));
 
     let mut visited = std::collections::HashSet::new();
     let source_dir = Path::new(input_path).parent().unwrap_or(Path::new("."));
