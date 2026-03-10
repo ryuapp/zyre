@@ -14,6 +14,7 @@ pub enum Token {
     Switch,
     Catch,
     Else,
+    Then,
     // Type keywords
     Void,
     // Literals
@@ -132,7 +133,7 @@ fn tokenize_raw(source: &str) -> Vec<(Token, Span)> {
             '\n' => {
                 chars.next();
                 // Insert AutoSemi if the previous token can end a statement
-                if tokens.last().map(|(t, _)| can_end_stmt(t)).unwrap_or(false) {
+                if tokens.last().is_some_and(|(t, _)| can_end_stmt(t)) {
                     tokens.push((Token::AutoSemi, (pos, pos + 1)));
                 }
             }
@@ -307,6 +308,7 @@ fn tokenize_raw(source: &str) -> Vec<(Token, Span)> {
                     "switch" => Token::Switch,
                     "catch" => Token::Catch,
                     "else" => Token::Else,
+                    "then" => Token::Then,
                     "and" => Token::And,
                     "or" => Token::Or,
                     "void" => Token::Void,

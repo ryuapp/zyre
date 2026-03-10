@@ -307,10 +307,14 @@ impl TypeChecker {
 
     fn collect_refs(stmts: &[Stmt]) -> std::collections::HashSet<String> {
         let mut refs = std::collections::HashSet::new();
-        for stmt in stmts {
-            Self::refs_stmt(stmt, &mut refs);
-        }
+        Self::refs_stmts(stmts, &mut refs);
         refs
+    }
+
+    fn refs_stmts(stmts: &[Stmt], refs: &mut std::collections::HashSet<String>) {
+        for stmt in stmts {
+            Self::refs_stmt(stmt, refs);
+        }
     }
 
     fn refs_stmt(stmt: &Stmt, refs: &mut std::collections::HashSet<String>) {
@@ -320,11 +324,20 @@ impl TypeChecker {
             }
             StmtKind::Return(Some(e)) => Self::refs_expr(e, refs),
             StmtKind::ExprStmt(e) => Self::refs_expr(e, refs),
-            StmtKind::If { cond, body } | StmtKind::While { cond, body } => {
+            StmtKind::If {
+                cond,
+                body,
+                else_body,
+            } => {
                 Self::refs_expr(cond, refs);
-                for s in body {
-                    Self::refs_stmt(s, refs);
+                Self::refs_stmts(body, refs);
+                if let Some(else_stmts) = else_body {
+                    Self::refs_stmts(else_stmts, refs);
                 }
+            }
+            StmtKind::While { cond, body } => {
+                Self::refs_expr(cond, refs);
+                Self::refs_stmts(body, refs);
             }
             _ => {}
         }
@@ -349,20 +362,14 @@ impl TypeChecker {
             ExprKind::UnOp { expr, .. } | ExprKind::Propagate(expr) => Self::refs_expr(expr, refs),
             ExprKind::Catch { expr, body, .. } => {
                 Self::refs_expr(expr, refs);
-                for s in body {
-                    Self::refs_stmt(s, refs);
-                }
+                Self::refs_stmts(body, refs);
             }
             ExprKind::Switch { expr, arms } => {
                 Self::refs_expr(expr, refs);
                 for arm in arms {
                     match &arm.body {
                         SwitchBody::Expr(e) => Self::refs_expr(e, refs),
-                        SwitchBody::Block(stmts) => {
-                            for s in stmts {
-                                Self::refs_stmt(s, refs);
-                            }
-                        }
+                        SwitchBody::Block(stmts) => Self::refs_stmts(stmts, refs),
                     }
                 }
             }
@@ -374,6 +381,11 @@ impl TypeChecker {
             ExprKind::Index { obj, idx } => {
                 Self::refs_expr(obj, refs);
                 Self::refs_expr(idx, refs);
+            }
+            ExprKind::If { cond, then, else_ } => {
+                Self::refs_expr(cond, refs);
+                Self::refs_expr(then, refs);
+                Self::refs_expr(else_, refs);
             }
             _ => {}
         }
@@ -417,7 +429,11 @@ impl TypeChecker {
                     ));
                 }
             }
-            StmtKind::If { cond, body } => {
+            StmtKind::If {
+                cond,
+                body,
+                else_body,
+            } => {
                 let cond_ty = self.check_expr(cond, scope);
                 if cond_ty != Ty::Bool {
                     self.error(format!(
@@ -427,6 +443,10 @@ impl TypeChecker {
                 }
                 let mut inner = scope.clone();
                 self.check_block(body, &mut inner, ret_ty);
+                if let Some(else_stmts) = else_body {
+                    let mut inner = scope.clone();
+                    self.check_block(else_stmts, &mut inner, ret_ty);
+                }
             }
             StmtKind::While { cond, body } => {
                 let cond_ty = self.check_expr(cond, scope);
@@ -703,6 +723,23 @@ impl TypeChecker {
                     }
                 }
                 result_ty
+            }
+
+            ExprKind::If { cond, then, else_ } => {
+                let cond_ty = self.check_expr(cond, scope);
+                if cond_ty != Ty::Bool && cond_ty != Ty::Unknown {
+                    self.error("if condition must be bool".to_string());
+                }
+                let then_ty = self.check_expr(then, scope);
+                let else_ty = self.check_expr(else_, scope);
+                if then_ty != else_ty && then_ty != Ty::Unknown && else_ty != Ty::Unknown {
+                    self.error(format!(
+                        "if branches have different types: '{}' vs '{}'",
+                        then_ty.display(),
+                        else_ty.display()
+                    ));
+                }
+                then_ty
             }
         }
     }

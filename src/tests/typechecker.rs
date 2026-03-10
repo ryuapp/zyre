@@ -201,3 +201,59 @@ fn test_empty_return_ok() {
         }
     "#);
 }
+
+// --- If statement with else ---
+
+#[test]
+fn test_if_stmt_else_ok() {
+    ok(r#"
+        fn main(): void {
+            if true {
+                return
+            } else {
+                return
+            }
+        }
+    "#);
+}
+
+#[test]
+fn test_if_stmt_else_condition_not_bool() {
+    err(
+        r#"
+        fn main(): void {
+            if 42 {
+                return
+            } else {
+                return
+            }
+        }
+    "#,
+        "if condition must be bool",
+    );
+}
+
+// --- If expression ---
+
+#[test]
+fn test_if_expr_ok() {
+    ok(r#"
+        fn choose(x: i32): string {
+            return if x > 0 then "positive" else "non-positive"
+        }
+        fn main(): void {}
+    "#);
+}
+
+#[test]
+fn test_if_expr_branch_type_mismatch() {
+    err(
+        r#"
+        fn choose(x: i32): string {
+            return if x > 0 then "positive" else 42
+        }
+        fn main(): void {}
+    "#,
+        "if branches have different types",
+    );
+}

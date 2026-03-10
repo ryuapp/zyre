@@ -129,6 +129,144 @@ fn test_codegen_empty_return() {
 }
 
 #[test]
+fn test_codegen_if_expr() {
+    let out = compile(
+        r#"
+        fn choose(x: i32): string {
+            return if x > 0 then "positive" else "non-positive"
+        }
+    "#,
+    );
+    assert!(
+        out.contains("if ((x > 0)) \"positive\" else \"non-positive\""),
+        "got:\n{}",
+        out
+    );
+}
+
+#[test]
+fn test_codegen_if_expr_uses_std() {
+    // std used inside if branches must trigger std import
+    let out = compile(
+        r#"
+        const std = import("std");
+        fn greet(flag: bool): void {
+            std.debug.print(if flag then "yes" else "no")
+        }
+    "#,
+    );
+    assert!(
+        out.contains("const std = @import(\"std\")"),
+        "expected std import, got:\n{}",
+        out
+    );
+}
+
+#[test]
+fn test_codegen_if_expr_alloc_propagation() {
+    // allocator-requiring call inside if branch must propagate allocator to caller
+    let out = compile(
+        r#"
+        const std = import("std");
+        fn load(flag: bool): !string {
+            return if flag then std.fs.readTextFile("a.txt") else std.fs.readTextFile("b.txt")
+        }
+    "#,
+    );
+    assert!(
+        out.contains("__zyre_allocator"),
+        "expected allocator param, got:\n{}",
+        out
+    );
+}
+
+#[test]
+fn test_codegen_if_stmt_else() {
+    let out = compile(
+        r#"
+        fn main(): void {
+            if true {
+                return
+            } else {
+                return
+            }
+        }
+    "#,
+    );
+    assert!(out.contains("} else {"), "got:\n{}", out);
+}
+
+#[test]
+fn test_codegen_if_stmt_else_std() {
+    // std used only in else branch must still trigger std import
+    let out = compile(
+        r#"
+        const std = import("std");
+        fn main(): void {
+            if false {
+                return
+            } else {
+                std.debug.print("else")
+            }
+        }
+    "#,
+    );
+    assert!(
+        out.contains("const std = @import(\"std\")"),
+        "got:\n{}",
+        out
+    );
+    assert!(out.contains("} else {"), "got:\n{}", out);
+}
+
+#[test]
+fn test_codegen_if_expr_nested() {
+    let out = compile(
+        r#"
+        fn classify(x: i32): string {
+            return if x > 0 then "pos" else if x == 0 then "zero" else "neg"
+        }
+    "#,
+    );
+    assert!(out.contains("if ((x > 0))"), "got:\n{}", out);
+    assert!(out.contains("if ((x == 0))"), "got:\n{}", out);
+}
+
+#[test]
+fn test_codegen_if_expr_as_arg() {
+    // if expression passed directly as function argument
+    let out = compile(
+        r#"
+        const std = import("std");
+        fn greet(flag: bool): void {
+            std.debug.print(if flag then "yes" else "no")
+        }
+    "#,
+    );
+    assert!(out.contains("__zyre_print(if (flag)"), "got:\n{}", out);
+}
+
+#[test]
+fn test_codegen_if_stmt_no_else() {
+    // if without else must not emit "} else {"
+    let out = compile(
+        r#"
+        export fn check(x: i32): void {
+            if x > 0 {
+                return
+            }
+        }
+    "#,
+    );
+    assert!(out.contains("if ((x > 0))"), "got:\n{}", out);
+    assert!(
+        !out.contains("} else {"),
+        "unexpected else branch, got:\n{}",
+        out
+    );
+}
+
+#[test]
 fn test_codegen_export_const_hoisted() {
     let out = compile(
         r#"
