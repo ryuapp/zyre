@@ -257,3 +257,24 @@ fn test_if_expr_branch_type_mismatch() {
         "if branches have different types",
     );
 }
+
+#[test]
+fn test_modulo_ok() {
+    ok(r#"
+        export fn rem(a: i32, b: i32): i32 { return a % b; }
+    "#);
+}
+
+#[test]
+fn test_modulo_type_mismatch() {
+    err(
+        r#"
+        fn main(): void {
+            const x: i32 = 10;
+            const y: f64 = 3.0;
+            const _z = x % y;
+        }
+    "#,
+        "Binary op type mismatch",
+    );
+}
