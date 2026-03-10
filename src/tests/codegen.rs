@@ -281,3 +281,15 @@ fn test_codegen_export_const_hoisted() {
     let main_start = out.find("pub fn main").unwrap_or(out.len());
     assert!(!out[main_start..].contains("const c ="), "got:\n{}", out);
 }
+
+#[test]
+fn test_codegen_modulo() {
+    let out = compile(
+        r#"
+        export fn rem(a: i32, b: i32): i32 {
+            return a % b;
+        }
+    "#,
+    );
+    assert!(out.contains("@rem(a, b)"), "got:\n{}", out);
+}

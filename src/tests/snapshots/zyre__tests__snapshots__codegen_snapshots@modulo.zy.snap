@@ -1,0 +1,9 @@
+---
+source: src/tests/snapshots.rs
+assertion_line: 10
+expression: output
+input_file: src/tests/fixtures/modulo.zy
+---
+pub fn rem(a: i32, b: i32) i32 {
+    return @rem(a, b);
+}

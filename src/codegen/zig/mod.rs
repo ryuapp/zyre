@@ -520,7 +520,11 @@ impl ZigBackend {
             }
 
             ExprKind::BinOp { op, lhs, rhs } => {
+                let lhs_s = self.gen_expr(lhs);
+                let rhs_s = self.gen_expr(rhs);
                 let op_str = match op {
+                    // Zig requires @rem for signed integer remainder (% only works on unsigned)
+                    BinOp::Mod => return format!("@rem({}, {})", lhs_s, rhs_s),
                     BinOp::Add => "+",
                     BinOp::Sub => "-",
                     BinOp::Mul => "*",
@@ -534,8 +538,6 @@ impl ZigBackend {
                     BinOp::And => "and",
                     BinOp::Or => "or",
                 };
-                let lhs_s = self.gen_expr(lhs);
-                let rhs_s = self.gen_expr(rhs);
                 format!("({} {} {})", lhs_s, op_str, rhs_s)
             }
 

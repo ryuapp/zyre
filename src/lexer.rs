@@ -36,6 +36,7 @@ pub enum Token {
     Minus,    // -
     Star,     // *
     Slash,    // /
+    Percent,  // %
     And,      // &&
     Or,       // ||
     Bang,     // !
@@ -203,6 +204,10 @@ fn tokenize_raw(source: &str) -> Vec<(Token, Span)> {
             '*' => {
                 chars.next();
                 tokens.push((Token::Star, (pos, end_pos!())));
+            }
+            '%' => {
+                chars.next();
+                tokens.push((Token::Percent, (pos, end_pos!())));
             }
             '.' => {
                 chars.next();

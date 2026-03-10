@@ -609,7 +609,7 @@ impl TypeChecker {
                 let lhs_ty = self.check_expr(lhs, scope);
                 let rhs_ty = self.check_expr(rhs, scope);
                 match op {
-                    BinOp::Add | BinOp::Sub | BinOp::Mul | BinOp::Div => {
+                    BinOp::Add | BinOp::Sub | BinOp::Mul | BinOp::Div | BinOp::Mod => {
                         if lhs_ty != rhs_ty {
                             self.error(format!(
                                 "Binary op type mismatch: '{}' vs '{}'",
