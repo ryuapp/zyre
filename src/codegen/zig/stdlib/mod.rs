@@ -55,8 +55,14 @@ impl ZigBackend {
                 self.expr_uses_allocator(value)
             }
             StmtKind::Return(Some(e)) => self.expr_uses_allocator(e),
-            StmtKind::If { cond, body } => {
-                self.expr_uses_allocator(cond) || self.uses_allocator(body)
+            StmtKind::If {
+                cond,
+                body,
+                else_body,
+            } => {
+                self.expr_uses_allocator(cond)
+                    || self.uses_allocator(body)
+                    || else_body.as_ref().is_some_and(|s| self.uses_allocator(s))
             }
             StmtKind::While { cond, body } => {
                 self.expr_uses_allocator(cond) || self.uses_allocator(body)
@@ -95,6 +101,11 @@ impl ZigBackend {
             ExprKind::ArrayLiteral(elems) => elems.iter().any(|e| self.expr_uses_allocator(e)),
             ExprKind::Index { obj, idx } => {
                 self.expr_uses_allocator(obj) || self.expr_uses_allocator(idx)
+            }
+            ExprKind::If { cond, then, else_ } => {
+                self.expr_uses_allocator(cond)
+                    || self.expr_uses_allocator(then)
+                    || self.expr_uses_allocator(else_)
             }
             _ => false,
         }

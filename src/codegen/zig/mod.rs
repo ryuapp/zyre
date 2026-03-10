@@ -432,7 +432,23 @@ impl ZigBackend {
             StmtKind::Return(Some(e)) => format!("{}return {};\n", ind, self.gen_expr(e)),
             StmtKind::Break => format!("{}break;\n", ind),
             StmtKind::Continue => format!("{}continue;\n", ind),
-            StmtKind::If { cond, body } => self.gen_cond_block("if", cond, body, level),
+            StmtKind::If {
+                cond,
+                body,
+                else_body,
+            } => {
+                let mut s = self.gen_cond_block("if", cond, body, level);
+                if let Some(else_stmts) = else_body {
+                    let ind = Self::indent(level);
+                    s.pop(); // remove trailing '\n'
+                    s.push_str(" else {\n");
+                    for stmt in else_stmts {
+                        s.push_str(&self.gen_stmt(stmt, level + 1));
+                    }
+                    s.push_str(&format!("{}}}\n", ind));
+                }
+                s
+            }
             StmtKind::While { cond, body } => self.gen_cond_block("while", cond, body, level),
             StmtKind::ExprStmt(e) => {
                 let s = self.gen_expr(e);
@@ -594,6 +610,15 @@ impl ZigBackend {
                 out.push('}');
                 out
             }
+
+            ExprKind::If { cond, then, else_ } => {
+                format!(
+                    "if ({}) {} else {}",
+                    self.gen_expr(cond),
+                    self.gen_expr(then),
+                    self.gen_expr(else_)
+                )
+            }
         }
     }
 
@@ -607,8 +632,16 @@ impl ZigBackend {
                 Self::expr_references_var(value, var)
             }
             StmtKind::Return(Some(e)) => Self::expr_references_var(e, var),
-            StmtKind::If { cond, body } => {
-                Self::expr_references_var(cond, var) || Self::stmts_reference_var(body, var)
+            StmtKind::If {
+                cond,
+                body,
+                else_body,
+            } => {
+                Self::expr_references_var(cond, var)
+                    || Self::stmts_reference_var(body, var)
+                    || else_body
+                        .as_ref()
+                        .is_some_and(|s| Self::stmts_reference_var(s, var))
             }
             StmtKind::While { cond, body } => {
                 Self::expr_references_var(cond, var) || Self::stmts_reference_var(body, var)
@@ -646,6 +679,11 @@ impl ZigBackend {
             }
             ExprKind::Index { obj, idx } => {
                 Self::expr_references_var(obj, var) || Self::expr_references_var(idx, var)
+            }
+            ExprKind::If { cond, then, else_ } => {
+                Self::expr_references_var(cond, var)
+                    || Self::expr_references_var(then, var)
+                    || Self::expr_references_var(else_, var)
             }
             _ => false,
         }

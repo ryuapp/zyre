@@ -54,7 +54,18 @@ impl ZigBackend {
             }
             StmtKind::Return(Some(e)) => self.expr_calls_any(e, targets),
             StmtKind::ExprStmt(e) => self.expr_calls_any(e, targets),
-            StmtKind::If { cond, body } | StmtKind::While { cond, body } => {
+            StmtKind::If {
+                cond,
+                body,
+                else_body,
+            } => {
+                self.expr_calls_any(cond, targets)
+                    || self.stmts_call_any(body, targets)
+                    || else_body
+                        .as_ref()
+                        .is_some_and(|s| self.stmts_call_any(s, targets))
+            }
+            StmtKind::While { cond, body } => {
                 self.expr_calls_any(cond, targets) || self.stmts_call_any(body, targets)
             }
             _ => false,
@@ -89,6 +100,11 @@ impl ZigBackend {
                         SwitchBody::Block(stmts) => self.stmts_call_any(stmts, targets),
                     })
             }
+            ExprKind::If { cond, then, else_ } => {
+                self.expr_calls_any(cond, targets)
+                    || self.expr_calls_any(then, targets)
+                    || self.expr_calls_any(else_, targets)
+            }
             _ => false,
         }
     }
@@ -113,7 +129,15 @@ impl ZigBackend {
                 self.expr_uses_std(value)
             }
             StmtKind::Return(Some(e)) => self.expr_uses_std(e),
-            StmtKind::If { cond, body } => self.expr_uses_std(cond) || self.stmts_use_std(body),
+            StmtKind::If {
+                cond,
+                body,
+                else_body,
+            } => {
+                self.expr_uses_std(cond)
+                    || self.stmts_use_std(body)
+                    || else_body.as_ref().is_some_and(|s| self.stmts_use_std(s))
+            }
             StmtKind::While { cond, body } => self.expr_uses_std(cond) || self.stmts_use_std(body),
             StmtKind::ExprStmt(e) => self.expr_uses_std(e),
             _ => false,
@@ -163,6 +187,9 @@ impl ZigBackend {
             }
             ExprKind::ArrayLiteral(elems) => elems.iter().any(|e| self.expr_uses_std(e)),
             ExprKind::Index { obj, idx } => self.expr_uses_std(obj) || self.expr_uses_std(idx),
+            ExprKind::If { cond, then, else_ } => {
+                self.expr_uses_std(cond) || self.expr_uses_std(then) || self.expr_uses_std(else_)
+            }
             _ => false,
         }
     }

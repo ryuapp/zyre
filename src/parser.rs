@@ -77,6 +77,11 @@ pub enum ExprKind {
         obj: Box<Expr>,
         idx: Box<Expr>,
     }, // arr[i] index expression
+    If {
+        cond: Box<Expr>,
+        then: Box<Expr>,
+        else_: Box<Expr>,
+    },
 }
 
 #[derive(Debug, Clone)]
@@ -145,6 +150,7 @@ pub enum StmtKind {
     If {
         cond: Expr,
         body: Vec<Stmt>,
+        else_body: Option<Vec<Stmt>>,
     },
     While {
         cond: Expr,
@@ -549,8 +555,21 @@ impl Parser {
                 self.expect(Token::LBrace);
                 let body = self.parse_block();
                 self.expect(Token::RBrace);
+                let else_body = if self.peek() == &Token::Else {
+                    self.advance();
+                    self.expect(Token::LBrace);
+                    let b = self.parse_block();
+                    self.expect(Token::RBrace);
+                    Some(b)
+                } else {
+                    None
+                };
                 Stmt {
-                    kind: StmtKind::If { cond, body },
+                    kind: StmtKind::If {
+                        cond,
+                        body,
+                        else_body,
+                    },
                     span,
                 }
             }
@@ -883,6 +902,24 @@ impl Parser {
                     kind: ExprKind::Switch {
                         expr: Box::new(expr),
                         arms,
+                    },
+                    span,
+                }
+            }
+            Token::If => {
+                let span_start = self.peek_span().0;
+                self.advance();
+                let cond = self.parse_expr();
+                self.expect(Token::Then);
+                let then = self.parse_expr();
+                self.expect(Token::Else);
+                let else_ = self.parse_expr();
+                let span = (span_start, self.prev_end());
+                Expr {
+                    kind: ExprKind::If {
+                        cond: Box::new(cond),
+                        then: Box::new(then),
+                        else_: Box::new(else_),
                     },
                     span,
                 }
