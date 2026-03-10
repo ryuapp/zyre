@@ -4,6 +4,7 @@ use std::process::Command;
 pub fn run(input_path: &str, ast: &crate::parser::Program, opt_level: Option<&str>) {
     let (stem, zig_path) = emit_zig(input_path, ast);
 
+    std::fs::create_dir_all("zyre-out").unwrap();
     let exe_path = if cfg!(windows) {
         format!("zyre-out/{}.exe", stem)
     } else {
