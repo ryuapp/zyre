@@ -5,6 +5,8 @@ fn readIt(): !string {
 }
 
 fn main(): void {
-    const data = readIt() catch _err { return }
+    const data = readIt() catch _err {
+        return
+    }
     std.debug.print(data)
 }

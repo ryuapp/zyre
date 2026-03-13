@@ -43,17 +43,19 @@ pub enum Token {
     Question, // ?
     FatArrow, // =>
     // Delimiters
-    LParen,   // (
-    RParen,   // )
-    LBrace,   // {
-    RBrace,   // }
-    LBracket, // [
-    RBracket, // ]
-    Colon,    // :
-    Semi,     // ;
-    AutoSemi, // ; automatically inserted from newline
-    Dot,      // .
-    Comma,    // ,
+    LParen,        // (
+    RParen,        // )
+    LBrace,        // {
+    RBrace,        // }
+    LBracket,      // [
+    RBracket,      // ]
+    Colon,         // :
+    Semi,          // ;
+    AutoSemi,      // ; automatically inserted from newline
+    Dot,           // .
+    Comma,         // ,
+    BlankLine,     // blank line between top-level items (two consecutive newlines)
+    Unknown(char), // unrecognized character
     EOF,
 }
 
@@ -98,22 +100,65 @@ pub fn tokenize(source: &str) -> Vec<(Token, Span)> {
     let tokens = tokenize_raw(source);
     // AutoSemi: drop it if the next token suppresses it, otherwise convert to Semi
     // Explicit Semi tokens are kept as-is
+    // BlankLine: inserted when two consecutive newlines appear between tokens
     let mut result = Vec::with_capacity(tokens.len());
+    let mut prev_end = 0usize;
     let mut i = 0;
     while i < tokens.len() {
-        if tokens[i].0 == Token::AutoSemi {
+        let (tok, span) = &tokens[i];
+        if *tok == Token::AutoSemi {
             let next = tokens.get(i + 1).map(|(t, _)| t).unwrap_or(&Token::EOF);
             if no_semi_before(next) {
+                // Keep prev_end at span.0 so the \n is available for blank line detection
+                prev_end = span.0;
                 i += 1;
                 continue;
             }
-            result.push((Token::Semi, tokens[i].1));
+            maybe_push_blank(source, prev_end, span.0, &mut result, *span);
+            result.push((Token::Semi, *span));
+            // Keep prev_end at span.0 so the \n is included in next gap check
+            prev_end = span.0;
         } else {
+            maybe_push_blank(source, prev_end, span.0, &mut result, *span);
             result.push(tokens[i].clone());
+            prev_end = span.1;
         }
         i += 1;
     }
     result
+}
+
+fn maybe_push_blank(
+    source: &str,
+    prev_end: usize,
+    cur_start: usize,
+    result: &mut Vec<(Token, Span)>,
+    span: Span,
+) {
+    if result.last().is_some_and(|(t, _)| *t == Token::BlankLine) {
+        return;
+    }
+    let gap = &source[prev_end..cur_start.min(source.len())];
+    if has_blank_line(gap) {
+        result.push((Token::BlankLine, span));
+    }
+}
+
+fn has_blank_line(s: &str) -> bool {
+    let mut saw_newline = false;
+    for c in s.chars() {
+        match c {
+            '\n' => {
+                if saw_newline {
+                    return true;
+                }
+                saw_newline = true;
+            }
+            '\r' | ' ' | '\t' => {}
+            _ => saw_newline = false,
+        }
+    }
+    false
 }
 
 fn tokenize_raw(source: &str) -> Vec<(Token, Span)> {
@@ -323,8 +368,9 @@ fn tokenize_raw(source: &str) -> Vec<(Token, Span)> {
                 };
                 tokens.push((tok, (pos, end)));
             }
-            _ => {
+            c => {
                 chars.next();
+                tokens.push((Token::Unknown(c), (pos, pos + c.len_utf8())));
             }
         }
     }

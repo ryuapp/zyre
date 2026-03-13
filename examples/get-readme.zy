@@ -2,7 +2,7 @@ const std = import("std")
 const fs = std.fs
 
 fn getReadme(filename: string): !string {
-    const data = fs.readTextFile(filename)?;
+    const data = fs.readTextFile(filename)?
     return data
 }
 

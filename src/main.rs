@@ -1,6 +1,7 @@
 mod codegen;
 mod colors;
 mod commands;
+mod fmt;
 mod lexer;
 mod parser;
 #[cfg(test)]
@@ -45,12 +46,9 @@ fn main() {
 
     match subcmd {
         "check" => {
+            let fix = flags.contains(&"--fix");
             let path = positional.get(1).copied();
-            if let Some(p) = path {
-                commands::check::check_source(&commands::read_file(p), p);
-            } else {
-                commands::check::run(None);
-            }
+            commands::check::run(path, fix);
         }
         "build" => {
             let input = positional.get(1).copied().unwrap_or_else(|| {

@@ -3,6 +3,7 @@ use crate::parser::parse;
 use crate::typechecker::check;
 
 mod codegen;
+mod fmt;
 mod lexer;
 mod snapshots;
 mod stdlib;
@@ -10,7 +11,7 @@ mod typechecker;
 
 pub(super) fn run(src: &str) -> Vec<String> {
     let tokens = tokenize(src);
-    let (ast, _) = parse(tokens);
+    let (ast, _, _) = parse(tokens);
     check(&ast, std::path::Path::new("."))
 }
 
@@ -31,7 +32,7 @@ pub(super) fn err(src: &str, expected: &str) {
 
 pub(super) fn compile(src: &str) -> String {
     let tokens = tokenize(src);
-    let (ast, _) = parse(tokens);
+    let (ast, _, _) = parse(tokens);
     crate::codegen::generate(&ast)
 }
 

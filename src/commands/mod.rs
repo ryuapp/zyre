@@ -9,17 +9,23 @@ pub fn read_file(path: &str) -> String {
     std::fs::read_to_string(path).unwrap_or_else(|e| panic!("Failed to read '{}': {}", path, e))
 }
 
-pub fn render_error(message: &str, span: (usize, usize), source: &str, path: &str) {
+pub fn full_path(p: &std::path::Path) -> String {
+    let s = p.canonicalize().unwrap_or_else(|_| p.to_path_buf());
+    let s = s.to_string_lossy();
+    s.strip_prefix(r"\\?\").unwrap_or(&s).to_string()
+}
+
+pub fn format_error(message: &str, span: (usize, usize), source: &str, path: &str) -> String {
     let (line, col, source_line, caret) = locate(span, source);
-    eprintln!(
-        "{}:{}:{}: {}",
+    format!(
+        "{}:{}:{}: {}\n    {}\n    {}",
         path,
         line,
         col,
-        crate::colors::error(message)
-    );
-    eprintln!("    {}", source_line);
-    eprintln!("    {}", caret);
+        crate::colors::error(message),
+        source_line,
+        caret
+    )
 }
 
 pub fn locate(span: (usize, usize), source: &str) -> (usize, usize, &str, String) {
@@ -108,7 +114,7 @@ fn compile_module_inner(
     }
     let source = read_file(source_path);
     let tokens = crate::lexer::tokenize(&source);
-    let (ast, _) = crate::parser::parse(tokens);
+    let (ast, _, _) = crate::parser::parse(tokens);
     let zig_code = crate::codegen::generate(&ast);
 
     let cache_dir = Path::new(cache_path).parent().unwrap();
