@@ -348,19 +348,38 @@ impl Parser {
 
     // --- Program ---
 
-    pub fn parse_program(&mut self) -> Program {
+    pub fn parse_program(&mut self) -> (Program, Vec<bool>) {
         let mut items = Vec::new();
+        let mut blanks = Vec::new();
         while self.peek() != &Token::EOF {
             // Skip stray `;` / AutoSemi at the top level
+            while matches!(self.peek(), Token::Semi | Token::AutoSemi) {
+                self.advance();
+            }
+            // Report and skip unknown characters
+            if let Token::Unknown(c) = self.peek().clone() {
+                self.error(format!("unexpected character '{}'", c));
+                self.advance();
+                continue;
+            }
+            // Detect blank line between top-level items
+            let blank_before = if self.peek() == &Token::BlankLine {
+                self.advance();
+                true
+            } else {
+                false
+            };
+            // Skip any trailing semis after blank line
             while matches!(self.peek(), Token::Semi | Token::AutoSemi) {
                 self.advance();
             }
             if self.peek() == &Token::EOF {
                 break;
             }
+            blanks.push(blank_before);
             items.push(self.parse_toplevel());
         }
-        items
+        (items, blanks)
     }
 
     fn parse_toplevel(&mut self) -> TopLevel {
@@ -1031,8 +1050,8 @@ impl Parser {
     }
 }
 
-pub fn parse(tokens: Vec<(Token, Span)>) -> (Program, Vec<ParseError>) {
+pub fn parse(tokens: Vec<(Token, Span)>) -> (Program, Vec<ParseError>, Vec<bool>) {
     let mut p = Parser::new(tokens);
-    let program = p.parse_program();
-    (program, p.errors)
+    let (program, blanks) = p.parse_program();
+    (program, p.errors, blanks)
 }

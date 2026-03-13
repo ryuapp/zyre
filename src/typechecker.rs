@@ -117,7 +117,7 @@ impl TypeChecker {
             Err(_) => return HashMap::new(),
         };
         let tokens = lexer::tokenize(&source);
-        let (ast, _) = parser::parse(tokens);
+        let (ast, _, _) = parser::parse(tokens);
         let mut exports = HashMap::new();
         for item in &ast {
             if let TopLevel::FnDecl(f) = item {

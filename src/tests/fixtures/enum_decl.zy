@@ -1,6 +1,11 @@
 const std = import("std")
 
-const Direction = enum { North, South, East, West }
+const Direction = enum {
+    North,
+    South,
+    East,
+    West,
+};
 
 fn describe(d: Direction): void {
     switch d {
