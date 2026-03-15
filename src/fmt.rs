@@ -362,5 +362,8 @@ fn precedence(op: &BinOp) -> u8 {
 pub fn format_program(program: &crate::parser::Program, blanks: &[bool]) -> String {
     let mut f = Formatter::new();
     f.format_program(program, blanks);
+    if !f.buf.ends_with('\n') {
+        f.buf.push('\n');
+    }
     f.buf
 }

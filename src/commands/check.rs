@@ -165,8 +165,14 @@ fn fmt_diff(source: &str, formatted: &str) -> String {
             }
         }
     }
-    let trimmed_len = out.trim_end().len();
-    out.truncate(trimmed_len);
+    if out.is_empty() && source != formatted {
+        // Only difference is trailing newline — show as an added empty line
+        let ln = source.lines().count() + 1;
+        out.push_str(&crate::colors::green(&format!("{} | +", ln)));
+    } else {
+        let trimmed_len = out.trim_end().len();
+        out.truncate(trimmed_len);
+    }
     out
 }
 
@@ -196,7 +202,7 @@ fn check_and_report(
     let mut changed = false;
     if parse_errors.is_empty() {
         let formatted = crate::fmt::format_program(&ast, &blanks);
-        if formatted.trim() != source.trim() {
+        if formatted != source {
             if fix {
                 std::fs::write(path, &formatted)
                     .unwrap_or_else(|e| panic!("Failed to write '{}': {}", path, e));

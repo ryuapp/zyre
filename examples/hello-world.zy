@@ -1,2 +1,2 @@
 const std = import("std")
-std.debug.print("Hello World!")
+std.debug.print("Hello, 世界")

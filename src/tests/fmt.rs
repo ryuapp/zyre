@@ -297,6 +297,27 @@ fn test_fmt_modulo() {
 }
 
 #[test]
+fn test_fmt_trailing_newline() {
+    let out = fmt("const x = 1");
+    assert!(
+        out.ends_with('\n'),
+        "expected trailing newline, got: {:?}",
+        out
+    );
+}
+
+#[test]
+fn test_fmt_trailing_newline_not_doubled() {
+    let out = fmt("const x = 1\n");
+    assert!(out.ends_with('\n'), "expected trailing newline");
+    assert!(
+        !out.ends_with("\n\n"),
+        "trailing newline doubled: {:?}",
+        out
+    );
+}
+
+#[test]
 fn test_fmt_fixtures_idempotent() {
     let fixtures = std::fs::read_dir("src/tests/fixtures")
         .unwrap()
