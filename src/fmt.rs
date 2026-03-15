@@ -61,13 +61,18 @@ impl Formatter {
         match item {
             TopLevel::ConstDecl {
                 name,
+                ty,
                 value,
                 exported,
                 ..
             } => {
                 let prefix = if *exported { "export " } else { "" };
+                let type_ann = ty
+                    .as_ref()
+                    .map(|t| format!(": {}", fmt_type(t)))
+                    .unwrap_or_default();
                 let val = self.fmt_expr(value);
-                self.line(&format!("{}const {} = {}", prefix, name, val));
+                self.line(&format!("{}const {}{} = {}", prefix, name, type_ann, val));
             }
             TopLevel::FnDecl(f) => self.fmt_fn(f),
             TopLevel::StructDecl {

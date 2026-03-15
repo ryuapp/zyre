@@ -157,11 +157,14 @@ impl TypeChecker {
         let mut import_names: std::collections::HashSet<String> = std::collections::HashSet::new();
         for item in program {
             match item {
-                TopLevel::ConstDecl { name, value, .. } => {
+                TopLevel::ConstDecl {
+                    name, ty, value, ..
+                } => {
                     let is_import = matches!(&value.kind, ExprKind::Import(_));
                     // Register all top-level ConstDecls into globals in order
-                    let ty = self.check_expr(value, &self.globals.clone());
-                    self.globals.insert(name.clone(), ty);
+                    let val_ty = self.check_expr(value, &self.globals.clone());
+                    let inferred_ty = self.resolve_decl_type(name, ty, val_ty);
+                    self.globals.insert(name.clone(), inferred_ty);
                     if is_import {
                         import_names.insert(name.clone());
                         // Pre-collect exports of local .zy modules
@@ -391,24 +394,31 @@ impl TypeChecker {
         }
     }
 
+    /// Resolve the declared type of a variable, checking for mismatches.
+    /// Returns the declared type if annotated, otherwise the inferred type.
+    fn resolve_decl_type(&mut self, name: &str, ty: &Option<TypeExpr>, val_ty: Ty) -> Ty {
+        if let Some(t) = ty {
+            let decl_ty = Ty::from_type_expr(t, &self.types);
+            if !decl_ty.is_assignable_from(&val_ty) {
+                self.error(format!(
+                    "Type mismatch: '{}' is declared as '{}' but got '{}'",
+                    name,
+                    decl_ty.display(),
+                    val_ty.display()
+                ));
+            }
+            decl_ty
+        } else {
+            val_ty
+        }
+    }
+
     fn check_stmt(&mut self, stmt: &Stmt, scope: &mut HashMap<String, Ty>, ret_ty: &Ty) {
         self.current_span = stmt.span;
         match &stmt.kind {
             StmtKind::ConstDecl { name, ty, value } | StmtKind::LetDecl { name, ty, value } => {
                 let val_ty = self.check_expr(value, scope);
-                let decl_ty = if let Some(t) = ty {
-                    Ty::from_type_expr(t, &self.types)
-                } else {
-                    val_ty.clone()
-                };
-                if !decl_ty.is_assignable_from(&val_ty) {
-                    self.error(format!(
-                        "Type mismatch: '{}' is declared as '{}' but got '{}'",
-                        name,
-                        decl_ty.display(),
-                        val_ty.display()
-                    ));
-                }
+                let decl_ty = self.resolve_decl_type(name, ty, val_ty);
                 scope.insert(name.clone(), decl_ty);
             }
             StmtKind::Return(None) => {

@@ -6,10 +6,8 @@ fn getReadme(filename: string): !string {
     return data
 }
 
-fn main(): void {
-    const data = getReadme("README.md") catch err {
-        std.debug.print(err)
-        return
-    }
-    std.debug.print(data)
+const data = getReadme("README.md") catch err {
+    std.debug.print(err)
+    return
 }
+std.debug.print(data)

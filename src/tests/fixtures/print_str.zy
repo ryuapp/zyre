@@ -1,5 +1,3 @@
 const std = import("std")
 
-fn main(): void {
-    std.debug.print("hello")
-}
+std.debug.print("hello")

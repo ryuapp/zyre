@@ -1,6 +1,4 @@
 const std = import("std")
 
-fn main(): void {
-    const x: i32 = 42
-    std.debug.print(x)
-}
+const x: i32 = 42
+std.debug.print(x)

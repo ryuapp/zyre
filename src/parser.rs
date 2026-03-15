@@ -190,6 +190,7 @@ pub enum TopLevel {
     ConstDecl {
         name: String,
         name_span: Span,
+        ty: Option<TypeExpr>,
         value: Expr,
         exported: bool,
     },
@@ -394,6 +395,12 @@ impl Parser {
             Token::Const => {
                 self.advance();
                 let (name, name_span) = self.expect_ident_spanned();
+                let ty = if self.peek() == &Token::Colon {
+                    self.advance();
+                    Some(self.parse_type())
+                } else {
+                    None
+                };
                 self.expect(Token::Eq);
                 match self.peek().clone() {
                     Token::Import => {
@@ -402,6 +409,7 @@ impl Parser {
                         TopLevel::ConstDecl {
                             name,
                             name_span,
+                            ty,
                             value,
                             exported,
                         }
@@ -454,6 +462,7 @@ impl Parser {
                         TopLevel::ConstDecl {
                             name,
                             name_span,
+                            ty,
                             value,
                             exported,
                         }
