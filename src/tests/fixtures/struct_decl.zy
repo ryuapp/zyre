@@ -9,6 +9,4 @@ fn getX(p: Point): i32 {
     return p.x
 }
 
-fn main(): void {
-    std.debug.print("ok")
-}
+std.debug.print("ok")

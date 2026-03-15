@@ -1,6 +1,4 @@
 const std = import("std")
 
-fn main(): void {
-    const arr: i32[3] = [1, 2, 3]
-    std.debug.print(arr[0])
-}
+const arr: i32[3] = [1, 2, 3]
+std.debug.print(arr[0])

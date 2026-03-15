@@ -9,9 +9,7 @@ fn label(n: i32): string {
     }
 }
 
-fn main(): void {
-    std.debug.print(label(1))
-    std.debug.print(label(2))
-    std.debug.print(label(3))
-    std.debug.print(label(99))
-}
+std.debug.print(label(1))
+std.debug.print(label(2))
+std.debug.print(label(3))
+std.debug.print(label(99))

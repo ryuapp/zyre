@@ -2,6 +2,8 @@ use crate::codegen::Backend;
 use crate::parser::*;
 use std::collections::{HashMap, HashSet};
 
+const MAIN_MANGLED: &str = "__zyre_fn_main";
+
 mod stdlib;
 mod tracker;
 
@@ -165,15 +167,13 @@ impl ZigBackend {
         // Hoisting: collect export const and their dependencies
         let hoisted = Self::collect_hoisted(program);
 
-        let has_explicit_main = program
-            .iter()
-            .any(|item| matches!(item, TopLevel::FnDecl(f) if f.name == "main"));
-
         // Pass 2: collect body_stmts first (needed for header generation)
         let mut body_stmts: Vec<Stmt> = Vec::new();
         for item in program {
             match item {
-                TopLevel::ConstDecl { name, value, .. } => {
+                TopLevel::ConstDecl {
+                    name, ty, value, ..
+                } => {
                     let is_import = matches!(&value.kind, ExprKind::Import(_));
                     let is_module_alias = if let ExprKind::MemberAccess { obj, .. } = &value.kind {
                         matches!(&obj.kind, ExprKind::Var(m) if import_names.contains(m) || self.aliases.contains_key(m))
@@ -189,7 +189,7 @@ impl ZigBackend {
                         body_stmts.push(Stmt {
                             kind: StmtKind::ConstDecl {
                                 name: name.clone(),
-                                ty: None,
+                                ty: ty.clone(),
                                 value: value.clone(),
                             },
                             span: (0, 0),
@@ -201,9 +201,8 @@ impl ZigBackend {
             }
         }
 
-        // main / implicit main uses std.heap, so std is required
-        let needs_std =
-            self.program_uses_std(program) || has_explicit_main || !body_stmts.is_empty();
+        // implicit main uses std.heap, so std is required
+        let needs_std = self.program_uses_std(program) || !body_stmts.is_empty();
 
         let mut out = String::new();
         if needs_std {
@@ -289,7 +288,7 @@ impl ZigBackend {
             }
         }
 
-        if !body_stmts.is_empty() && !has_explicit_main {
+        if !body_stmts.is_empty() {
             let needs_alloc = self.uses_allocator(&body_stmts);
             out.push_str("pub fn main() !void {\n");
             out.push_str("    try __zyre_runtime.Output.init();\n");
@@ -323,6 +322,14 @@ impl ZigBackend {
         }
     }
 
+    fn is_allocating_call(&self, callee: &Expr) -> bool {
+        if let ExprKind::Var(name) = &callee.kind {
+            self.allocating_fns.contains(name)
+        } else {
+            false
+        }
+    }
+
     fn gen_fn(&mut self, f: &FnDecl) -> String {
         let params: Vec<String> = f
             .params
@@ -330,19 +337,12 @@ impl ZigBackend {
             .map(|(name, ty)| format!("{}: {}", name, self.gen_type(ty)))
             .collect();
 
-        let (ret, pub_prefix) = if f.name == "main" {
-            ("!void".to_string(), "pub ")
-        } else if f.exported {
-            (self.gen_type(&f.ret), "pub ")
-        } else {
-            (self.gen_type(&f.ret), "")
-        };
+        let pub_prefix = if f.exported { "pub " } else { "" };
+        let ret = self.gen_type(&f.ret);
 
         let needs_alloc = self.allocating_fns.contains(&f.name);
 
-        let params_str = if f.name == "main" {
-            "".to_string()
-        } else if needs_alloc {
+        let params_str = if needs_alloc {
             let mut all = vec!["__zyre_allocator: std.mem.Allocator".to_string()];
             all.extend(params);
             all.join(", ")
@@ -350,13 +350,13 @@ impl ZigBackend {
             params.join(", ")
         };
 
-        let mut out = format!("{}fn {}({}) {} {{\n", pub_prefix, f.name, params_str, ret);
-
-        if f.name == "main" {
-            out.push_str("    try __zyre_runtime.Output.init();\n");
-            out.push_str("    defer __zyre_runtime.Output.restore();\n");
-            out.push_str(&Self::gen_arena_setup(needs_alloc));
-        }
+        // "main" is reserved for the implicit entry point in Zig; mangle user-defined fn main
+        let zig_name = if f.name == "main" {
+            MAIN_MANGLED
+        } else {
+            &f.name
+        };
+        let mut out = format!("{}fn {}({}) {} {{\n", pub_prefix, zig_name, params_str, ret);
 
         for stmt in &f.body {
             out.push_str(&self.gen_stmt(stmt, 1));
@@ -508,13 +508,16 @@ impl ZigBackend {
                         }
                     }
                 }
-                let callee_s = self.gen_expr(callee);
+                // Mangle calls to user-defined "main" to match the renamed fn
+                let callee_s = if matches!(&callee.kind, ExprKind::Var(n) if n == "main") {
+                    MAIN_MANGLED.to_string()
+                } else {
+                    self.gen_expr(callee)
+                };
                 let mut args_str = self.gen_args(args);
                 // Insert __zyre_allocator as the first argument when calling an allocating fn
-                if let ExprKind::Var(name) = &callee.kind {
-                    if self.allocating_fns.contains(name) {
-                        args_str.insert(0, "__zyre_allocator".to_string());
-                    }
+                if self.is_allocating_call(callee) {
+                    args_str.insert(0, "__zyre_allocator".to_string());
                 }
                 format!("{}({})", callee_s, args_str.join(", "))
             }

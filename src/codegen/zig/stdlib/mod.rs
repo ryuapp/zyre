@@ -80,6 +80,10 @@ impl ZigBackend {
         // Check recursively
         match &expr.kind {
             ExprKind::Call { callee, args } => {
+                // Calling a user function that transitively needs an allocator
+                if self.is_allocating_call(callee) {
+                    return true;
+                }
                 self.expr_uses_allocator(callee) || args.iter().any(|a| self.expr_uses_allocator(a))
             }
             ExprKind::MemberAccess { obj, .. } => self.expr_uses_allocator(obj),

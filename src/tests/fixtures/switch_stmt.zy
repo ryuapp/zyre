@@ -8,6 +8,4 @@ fn check(n: i32): void {
     }
 }
 
-fn main(): void {
-    check(1)
-}
+check(1)

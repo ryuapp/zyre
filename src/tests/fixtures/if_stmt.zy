@@ -1,8 +1,6 @@
 const std = import("std")
 
-fn main(): void {
-    const x = true
-    if x {
-        std.debug.print("yes")
-    }
+const x = true
+if x {
+    std.debug.print("yes")
 }

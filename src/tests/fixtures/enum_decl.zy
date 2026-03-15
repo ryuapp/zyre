@@ -16,6 +16,4 @@ fn describe(d: Direction): void {
     }
 }
 
-fn main(): void {
-    std.debug.print("ok")
-}
+std.debug.print("ok")
