@@ -16,9 +16,9 @@ impl ZigBackend {
             } else {
                 self.gen_expr(arg)
             };
-            format!("__zyre_print({})", arg_s)
+            format!("__zyre_std_debug.print({})", arg_s)
         } else {
-            "__zyre_print(\"\")".to_string()
+            "__zyre_std_debug.print(\"\")".to_string()
         }
     }
 

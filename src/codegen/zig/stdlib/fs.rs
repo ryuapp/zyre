@@ -5,15 +5,11 @@ impl ZigBackend {
     pub(super) fn gen_fs_call(&mut self, fn_name: &str, args: &[Expr]) -> String {
         match fn_name {
             "readTextFile" => {
-                if let Some(arg) = args.first() {
-                    format!(
-                        "std.fs.cwd().readFileAlloc(__zyre_allocator, {}, std.math.maxInt(usize))",
-                        self.gen_expr(arg)
-                    )
-                } else {
-                    "std.fs.cwd().readFileAlloc(__zyre_allocator, \"\", std.math.maxInt(usize))"
-                        .to_string()
-                }
+                let arg = args
+                    .first()
+                    .map(|a| self.gen_expr(a))
+                    .unwrap_or_else(|| "\"\"".to_string());
+                format!("__zyre_std_fs.readTextFile(__zyre_allocator, {})", arg)
             }
             _ => {
                 let args_str = self.gen_args(args);

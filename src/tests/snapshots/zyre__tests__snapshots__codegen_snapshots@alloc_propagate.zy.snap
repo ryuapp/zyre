@@ -6,17 +6,11 @@ input_file: src/tests/fixtures/alloc_propagate.zy
 ---
 const std = @import("std");
 const __zyre_runtime = @import("zyre_runtime.zig");
-
-fn __zyre_print(val: anytype) void {
-    if (comptime @typeInfo(@TypeOf(val)) == .pointer) {
-        std.debug.print("{s}\n", .{val});
-    } else {
-        std.debug.print("{}\n", .{val});
-    }
-}
+const __zyre_std_debug = @import("zyre_std_debug.zig");
+const __zyre_std_fs = @import("zyre_std_fs.zig");
 
 fn readIt(__zyre_allocator: std.mem.Allocator) ![]const u8 {
-    return (try std.fs.cwd().readFileAlloc(__zyre_allocator, "x.txt", std.math.maxInt(usize)));
+    return (try __zyre_std_fs.readTextFile(__zyre_allocator, "x.txt"));
 }
 
 pub fn main() !void {
@@ -29,5 +23,5 @@ pub fn main() !void {
     const data = readIt(__zyre_allocator) catch {
     return;
 };
-    __zyre_print(data);
+    __zyre_std_debug.print(data);
 }
