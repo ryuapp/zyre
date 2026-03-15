@@ -6,14 +6,8 @@ input_file: src/tests/fixtures/struct_decl.zy
 ---
 const std = @import("std");
 const __zyre_runtime = @import("zyre_runtime.zig");
-
-fn __zyre_print(val: anytype) void {
-    if (comptime @typeInfo(@TypeOf(val)) == .pointer) {
-        std.debug.print("{s}\n", .{val});
-    } else {
-        std.debug.print("{}\n", .{val});
-    }
-}
+const __zyre_std_debug = @import("zyre_std_debug.zig");
+const __zyre_std_fs = @import("zyre_std_fs.zig");
 
 const Point = struct {
     x: i32,
@@ -32,5 +26,5 @@ pub fn main() !void {
     const __zyre_allocator = __zyre_arena.allocator();
     _ = __zyre_allocator;
 
-    __zyre_print("ok");
+    __zyre_std_debug.print("ok");
 }

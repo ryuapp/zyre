@@ -6,14 +6,8 @@ input_file: src/tests/fixtures/enum_decl.zy
 ---
 const std = @import("std");
 const __zyre_runtime = @import("zyre_runtime.zig");
-
-fn __zyre_print(val: anytype) void {
-    if (comptime @typeInfo(@TypeOf(val)) == .pointer) {
-        std.debug.print("{s}\n", .{val});
-    } else {
-        std.debug.print("{}\n", .{val});
-    }
-}
+const __zyre_std_debug = @import("zyre_std_debug.zig");
+const __zyre_std_fs = @import("zyre_std_fs.zig");
 
 const Direction = enum {
     North,
@@ -24,10 +18,10 @@ const Direction = enum {
 
 fn describe(d: Direction) void {
     switch (d) {
-    .North => __zyre_print("north"),
-    .South => __zyre_print("south"),
-    .East => __zyre_print("east"),
-    .West => __zyre_print("west"),
+    .North => __zyre_std_debug.print("north"),
+    .South => __zyre_std_debug.print("south"),
+    .East => __zyre_std_debug.print("east"),
+    .West => __zyre_std_debug.print("west"),
 }
 }
 
@@ -39,5 +33,5 @@ pub fn main() !void {
     const __zyre_allocator = __zyre_arena.allocator();
     _ = __zyre_allocator;
 
-    __zyre_print("ok");
+    __zyre_std_debug.print("ok");
 }

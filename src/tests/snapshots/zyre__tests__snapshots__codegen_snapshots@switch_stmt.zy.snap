@@ -6,20 +6,14 @@ input_file: src/tests/fixtures/switch_stmt.zy
 ---
 const std = @import("std");
 const __zyre_runtime = @import("zyre_runtime.zig");
-
-fn __zyre_print(val: anytype) void {
-    if (comptime @typeInfo(@TypeOf(val)) == .pointer) {
-        std.debug.print("{s}\n", .{val});
-    } else {
-        std.debug.print("{}\n", .{val});
-    }
-}
+const __zyre_std_debug = @import("zyre_std_debug.zig");
+const __zyre_std_fs = @import("zyre_std_fs.zig");
 
 fn check(n: i32) void {
     switch (n) {
-    1 => __zyre_print("one"),
-    2 => __zyre_print("two"),
-    else => __zyre_print("other"),
+    1 => __zyre_std_debug.print("one"),
+    2 => __zyre_std_debug.print("two"),
+    else => __zyre_std_debug.print("other"),
 }
 }
 

@@ -6,14 +6,8 @@ input_file: src/tests/fixtures/print_int.zy
 ---
 const std = @import("std");
 const __zyre_runtime = @import("zyre_runtime.zig");
-
-fn __zyre_print(val: anytype) void {
-    if (comptime @typeInfo(@TypeOf(val)) == .pointer) {
-        std.debug.print("{s}\n", .{val});
-    } else {
-        std.debug.print("{}\n", .{val});
-    }
-}
+const __zyre_std_debug = @import("zyre_std_debug.zig");
+const __zyre_std_fs = @import("zyre_std_fs.zig");
 
 pub fn main() !void {
     try __zyre_runtime.Output.init();
@@ -24,5 +18,5 @@ pub fn main() !void {
     _ = __zyre_allocator;
 
     const x: i32 = 42;
-    __zyre_print(x);
+    __zyre_std_debug.print(x);
 }

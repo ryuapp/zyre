@@ -50,13 +50,13 @@ fn test_codegen_print_generic_format() {
     "#,
     );
     assert!(
-        out.contains("__zyre_print("),
-        "expected __zyre_print call, got:\n{}",
+        out.contains("__zyre_std_debug.print("),
+        "expected __zyre_std_debug.print call, got:\n{}",
         out
     );
     assert!(
-        out.contains("fn __zyre_print("),
-        "expected __zyre_print definition, got:\n{}",
+        out.contains("@import(\"zyre_std_debug.zig\")"),
+        "expected zyre_std_debug import, got:\n{}",
         out
     );
 }
@@ -78,10 +78,10 @@ fn test_codegen_import_alias() {
     let out = compile(
         r#"
         const s = import("std");
-        s.print("hello");
+        s.debug.print("hello");
     "#,
     );
-    assert!(out.contains("std.debug.print"), "got:\n{}", out);
+    assert!(out.contains("__zyre_std_debug.print"), "got:\n{}", out);
     assert!(!out.contains("const s = @import"), "got:\n{}", out);
 }
 
@@ -243,7 +243,11 @@ fn test_codegen_if_expr_as_arg() {
         }
     "#,
     );
-    assert!(out.contains("__zyre_print(if (flag)"), "got:\n{}", out);
+    assert!(
+        out.contains("__zyre_std_debug.print(if (flag)"),
+        "got:\n{}",
+        out
+    );
 }
 
 #[test]

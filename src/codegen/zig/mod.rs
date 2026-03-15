@@ -208,25 +208,14 @@ impl ZigBackend {
         if needs_std {
             out.push_str("const std = @import(\"std\");\n");
             out.push_str("const __zyre_runtime = @import(\"zyre_runtime.zig\");\n");
+            out.push_str("const __zyre_std_debug = @import(\"zyre_std_debug.zig\");\n");
+            out.push_str("const __zyre_std_fs = @import(\"zyre_std_fs.zig\");\n");
         }
         for (name, path) in &user_imports {
             out.push_str(&format!("const {} = @import(\"{}\");\n", name, path));
         }
         if needs_std || !user_imports.is_empty() {
             out.push('\n');
-        }
-
-        // __zyre_print helper (selects {s} or {} based on the value type)
-        if needs_std {
-            out.push_str(concat!(
-                "fn __zyre_print(val: anytype) void {\n",
-                "    if (comptime @typeInfo(@TypeOf(val)) == .pointer) {\n",
-                "        std.debug.print(\"{s}\\n\", .{val});\n",
-                "    } else {\n",
-                "        std.debug.print(\"{}\\n\", .{val});\n",
-                "    }\n",
-                "}\n\n",
-            ));
         }
 
         // Emit hoisted export consts at the top level (preserving declaration order)
