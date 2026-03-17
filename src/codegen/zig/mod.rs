@@ -29,12 +29,10 @@ impl ZigBackend {
         }
     }
 
-    /// Resolves an alias name to the actual module name (e.g. "s" -> "std")
-    pub(super) fn resolve_module<'a>(&'a self, name: &'a str) -> &'a str {
-        self.import_aliases
-            .get(name)
-            .map(|s| s.as_str())
-            .unwrap_or(name)
+    /// Resolves an alias name to the actual module name (e.g. "s" -> "std").
+    /// Returns None if the name is not a known import alias.
+    pub(super) fn resolve_module<'a>(&'a self, name: &'a str) -> Option<&'a str> {
+        self.import_aliases.get(name).map(|s| s.as_str())
     }
 
     fn zy_to_zig_path(path: &str) -> String {
@@ -46,7 +44,7 @@ impl ZigBackend {
     }
 
     pub(super) fn is_std_module(&self, name: &str) -> bool {
-        self.resolve_module(name) == "std"
+        self.resolve_module(name) == Some("std")
     }
 
     pub(super) fn gen_args(&mut self, args: &[Expr]) -> Vec<String> {
@@ -140,13 +138,13 @@ impl ZigBackend {
                     self.imports.push(module.clone());
                     import_names.insert(name.clone());
                     self.import_aliases.insert(name.clone(), module.clone());
-                    if !self.is_std_module(module) {
+                    if module != "std" {
                         user_imports.push((name.clone(), Self::zy_to_zig_path(module)));
                     }
                 }
                 if let ExprKind::MemberAccess { obj, prop } = &value.kind {
                     if let ExprKind::Var(module) = &obj.kind {
-                        let resolved = self.resolve_module(module).to_string();
+                        let resolved = self.resolve_module(module).unwrap_or(module).to_string();
                         self.aliases.insert(name.clone(), (resolved, prop.clone()));
                     }
                 }

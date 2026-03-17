@@ -1,0 +1,11 @@
+---
+source: src/tests/snapshots.rs
+expression: output
+input_file: src/tests/fixtures/fn_call.zy
+---
+import * as __zyre_std_debug from "./zyre_std_debug.ts";
+
+function add(a: number, b: number): number {
+  return (a + b);
+}
+__zyre_std_debug.print(add(1, 2));

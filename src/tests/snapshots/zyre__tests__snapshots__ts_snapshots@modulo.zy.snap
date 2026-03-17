@@ -1,0 +1,8 @@
+---
+source: src/tests/snapshots.rs
+expression: output
+input_file: src/tests/fixtures/modulo.zy
+---
+export function rem(a: number, b: number): number {
+  return (a % b);
+}

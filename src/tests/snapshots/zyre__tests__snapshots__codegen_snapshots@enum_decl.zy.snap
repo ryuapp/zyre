@@ -1,6 +1,5 @@
 ---
 source: src/tests/snapshots.rs
-assertion_line: 10
 expression: output
 input_file: src/tests/fixtures/enum_decl.zy
 ---
@@ -18,10 +17,10 @@ const Direction = enum {
 
 fn describe(d: Direction) void {
     switch (d) {
-    .North => __zyre_std_debug.print("north"),
-    .South => __zyre_std_debug.print("south"),
-    .East => __zyre_std_debug.print("east"),
-    .West => __zyre_std_debug.print("west"),
+    .North => __zyre_std_debug.print(.{"north"}),
+    .South => __zyre_std_debug.print(.{"south"}),
+    .East => __zyre_std_debug.print(.{"east"}),
+    .West => __zyre_std_debug.print(.{"west"}),
 }
 }
 
@@ -33,5 +32,5 @@ pub fn main() !void {
     const __zyre_allocator = __zyre_arena.allocator();
     _ = __zyre_allocator;
 
-    __zyre_std_debug.print("ok");
+    __zyre_std_debug.print(.{"ok"});
 }

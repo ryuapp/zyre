@@ -57,10 +57,10 @@ fn test_std_print_arg_count() {
         r#"
         const std = import("std");
         fn main(): void {
-            std.debug.print("a", "b");
+            std.debug.print();
         }
     "#,
-        "std.debug.print expects 1 argument",
+        "std.debug.print expects at least 1 argument",
     );
 }
 

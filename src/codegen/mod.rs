@@ -1,5 +1,6 @@
 use crate::parser::Program;
 
+pub mod ts;
 pub mod zig;
 
 pub trait Backend {

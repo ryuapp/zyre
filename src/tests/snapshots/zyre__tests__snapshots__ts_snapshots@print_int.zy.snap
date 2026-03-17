@@ -1,0 +1,9 @@
+---
+source: src/tests/snapshots.rs
+expression: output
+input_file: src/tests/fixtures/print_int.zy
+---
+import * as __zyre_std_debug from "./zyre_std_debug.ts";
+
+const x: number = 42;
+__zyre_std_debug.print(x);

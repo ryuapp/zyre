@@ -5,21 +5,18 @@ mod fs;
 
 impl ZigBackend {
     pub(super) fn gen_print_call(&mut self, args: &[Expr]) -> String {
-        if let Some(arg) = args.first() {
-            // Error variables bound in a catch block are wrapped with @errorName
-            let arg_s = if let ExprKind::Var(name) = &arg.kind {
-                if self.catch_err_vars.contains(name) {
-                    format!("@errorName({})", name)
-                } else {
-                    self.gen_expr(arg)
+        let args_s: Vec<String> = args
+            .iter()
+            .map(|arg| {
+                if let ExprKind::Var(name) = &arg.kind {
+                    if self.catch_err_vars.contains(name) {
+                        return format!("@errorName({})", name);
+                    }
                 }
-            } else {
                 self.gen_expr(arg)
-            };
-            format!("__zyre_std_debug.print({})", arg_s)
-        } else {
-            "__zyre_std_debug.print(\"\")".to_string()
-        }
+            })
+            .collect();
+        format!("__zyre_std_debug.print(.{{{}}})", args_s.join(", "))
     }
 
     pub(super) fn gen_std_call(&mut self, fn_name: &str, args: &[Expr]) -> String {

@@ -1,0 +1,9 @@
+---
+source: src/tests/snapshots.rs
+expression: output
+input_file: src/tests/fixtures/array.zy
+---
+import * as __zyre_std_debug from "./zyre_std_debug.ts";
+
+const arr: number[] = [1, 2, 3];
+__zyre_std_debug.print(arr[0]);

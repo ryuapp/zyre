@@ -1,0 +1,11 @@
+---
+source: src/tests/snapshots.rs
+expression: output
+input_file: src/tests/fixtures/switch_stmt.zy
+---
+import * as __zyre_std_debug from "./zyre_std_debug.ts";
+
+function check(n: number): void {
+  (() => { switch (n) { case 1: return __zyre_std_debug.print("one"); case 2: return __zyre_std_debug.print("two"); default: return __zyre_std_debug.print("other"); } })();
+}
+check(1);

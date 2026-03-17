@@ -1,6 +1,5 @@
 ---
 source: src/tests/snapshots.rs
-assertion_line: 10
 expression: output
 input_file: src/tests/fixtures/if_stmt.zy
 ---
@@ -19,6 +18,6 @@ pub fn main() !void {
 
     const x = true;
     if (x) {
-        __zyre_std_debug.print("yes");
+        __zyre_std_debug.print(.{"yes"});
     }
 }

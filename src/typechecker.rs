@@ -765,11 +765,8 @@ impl TypeChecker {
     fn check_std_ns_call(&mut self, module: &str, ns: &str, fn_name: &str, args: &[Expr]) -> Ty {
         match (module, ns, fn_name) {
             ("std", "debug", "print") => {
-                if args.len() != 1 {
-                    self.error(format!(
-                        "std.debug.print expects 1 argument, got {}",
-                        args.len()
-                    ));
+                if args.is_empty() {
+                    self.error("std.debug.print expects at least 1 argument".to_string());
                 }
                 Ty::Void
             }

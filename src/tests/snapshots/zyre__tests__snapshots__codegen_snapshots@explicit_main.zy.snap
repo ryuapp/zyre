@@ -1,6 +1,5 @@
 ---
 source: src/tests/snapshots.rs
-assertion_line: 10
 expression: output
 input_file: src/tests/fixtures/explicit_main.zy
 ---
@@ -10,7 +9,7 @@ const __zyre_std_debug = @import("zyre_std_debug.zig");
 const __zyre_std_fs = @import("zyre_std_fs.zig");
 
 fn __zyre_fn_main() void {
-    __zyre_std_debug.print("hello from main");
+    __zyre_std_debug.print(.{"hello from main"});
 }
 
 pub fn main() !void {

@@ -244,7 +244,7 @@ fn test_codegen_if_expr_as_arg() {
     "#,
     );
     assert!(
-        out.contains("__zyre_std_debug.print(if (flag)"),
+        out.contains("__zyre_std_debug.print(.{if (flag)"),
         "got:\n{}",
         out
     );

@@ -1,0 +1,11 @@
+---
+source: src/tests/snapshots.rs
+expression: output
+input_file: src/tests/fixtures/export_const.zy
+---
+import * as __zyre_std_debug from "./zyre_std_debug.ts";
+
+const a = 2;
+const b = 3;
+export const c = (a * b);
+__zyre_std_debug.print(c);
