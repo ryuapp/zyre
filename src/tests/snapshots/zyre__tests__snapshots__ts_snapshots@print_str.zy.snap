@@ -1,0 +1,8 @@
+---
+source: src/tests/snapshots.rs
+expression: output
+input_file: src/tests/fixtures/print_str.zy
+---
+import * as __zyre_std_debug from "./zyre_std_debug.ts";
+
+__zyre_std_debug.print("hello");

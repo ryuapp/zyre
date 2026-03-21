@@ -1,0 +1,18 @@
+---
+source: src/tests/snapshots.rs
+expression: output
+input_file: src/tests/fixtures/enum_decl.zy
+---
+import * as __zyre_std_debug from "./zyre_std_debug.ts";
+
+const enum Direction {
+  North,
+  South,
+  East,
+  West,
+}
+
+function describe(d: Direction): void {
+  (() => { switch (d) { case North: return __zyre_std_debug.print("north"); case South: return __zyre_std_debug.print("south"); case East: return __zyre_std_debug.print("east"); case West: return __zyre_std_debug.print("west"); } })();
+}
+__zyre_std_debug.print("ok");

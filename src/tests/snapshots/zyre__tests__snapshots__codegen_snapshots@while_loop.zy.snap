@@ -1,6 +1,5 @@
 ---
 source: src/tests/snapshots.rs
-assertion_line: 10
 expression: output
 input_file: src/tests/fixtures/while_loop.zy
 ---
@@ -19,7 +18,7 @@ pub fn main() !void {
 
     const x = true;
     while (x) {
-        __zyre_std_debug.print("loop");
+        __zyre_std_debug.print(.{"loop"});
         break;
     }
 }

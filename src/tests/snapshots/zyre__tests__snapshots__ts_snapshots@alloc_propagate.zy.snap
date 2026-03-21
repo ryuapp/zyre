@@ -1,0 +1,13 @@
+---
+source: src/tests/snapshots.rs
+expression: output
+input_file: src/tests/fixtures/alloc_propagate.zy
+---
+import * as __zyre_std_debug from "./zyre_std_debug.ts";
+import * as __zyre_std_fs from "./zyre_std_fs.ts";
+
+function readIt(): string {
+  return __zyre_std_fs.readTextFile("x.txt");
+}
+const data = (() => { try { return readIt(); } catch (_e) { return;; } })();
+__zyre_std_debug.print(data);

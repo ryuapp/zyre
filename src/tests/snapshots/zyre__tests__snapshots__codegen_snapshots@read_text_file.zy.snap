@@ -1,6 +1,5 @@
 ---
 source: src/tests/snapshots.rs
-assertion_line: 10
 expression: output
 input_file: src/tests/fixtures/read_text_file.zy
 ---
@@ -19,5 +18,5 @@ pub fn main() !void {
     const data = __zyre_std_fs.readTextFile(__zyre_allocator, "file.txt") catch {
     return;
 };
-    __zyre_std_debug.print(data);
+    __zyre_std_debug.print(.{data});
 }

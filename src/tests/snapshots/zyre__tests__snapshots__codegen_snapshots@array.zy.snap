@@ -1,6 +1,5 @@
 ---
 source: src/tests/snapshots.rs
-assertion_line: 10
 expression: output
 input_file: src/tests/fixtures/array.zy
 ---
@@ -18,5 +17,5 @@ pub fn main() !void {
     _ = __zyre_allocator;
 
     const arr: [3]i32 = .{1, 2, 3};
-    __zyre_std_debug.print(arr[0]);
+    __zyre_std_debug.print(.{arr[0]});
 }

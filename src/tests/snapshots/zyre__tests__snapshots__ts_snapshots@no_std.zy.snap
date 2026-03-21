@@ -1,0 +1,8 @@
+---
+source: src/tests/snapshots.rs
+expression: output
+input_file: src/tests/fixtures/no_std.zy
+---
+export function add(a: number, b: number): number {
+  return (a + b);
+}

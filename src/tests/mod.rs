@@ -36,6 +36,13 @@ pub(super) fn compile(src: &str) -> String {
     crate::codegen::generate(&ast)
 }
 
+pub(super) fn compile_ts(src: &str) -> String {
+    use crate::codegen::Backend;
+    let tokens = tokenize(src);
+    let (ast, _, _) = parse(tokens);
+    crate::codegen::ts::TsBackend::new().generate(&ast)
+}
+
 // --- Happy path tests ---
 
 #[test]

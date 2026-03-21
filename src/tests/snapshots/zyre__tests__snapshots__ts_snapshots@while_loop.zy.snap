@@ -1,0 +1,12 @@
+---
+source: src/tests/snapshots.rs
+expression: output
+input_file: src/tests/fixtures/while_loop.zy
+---
+import * as __zyre_std_debug from "./zyre_std_debug.ts";
+
+const x = true;
+while (x) {
+  __zyre_std_debug.print("loop");
+  break;
+}

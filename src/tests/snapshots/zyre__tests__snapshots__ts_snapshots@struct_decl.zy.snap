@@ -1,0 +1,16 @@
+---
+source: src/tests/snapshots.rs
+expression: output
+input_file: src/tests/fixtures/struct_decl.zy
+---
+import * as __zyre_std_debug from "./zyre_std_debug.ts";
+
+interface Point {
+  x: number;
+  y: number;
+}
+
+function getX(p: Point): number {
+  return p.x;
+}
+__zyre_std_debug.print("ok");

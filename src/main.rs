@@ -52,12 +52,12 @@ fn main() {
         }
         "build" => {
             let input = positional.get(1).copied().unwrap_or_else(|| {
-                eprintln!("Usage: zyre build <file.zy>");
+                eprintln!("Usage: zyre build --ts <file.zy>");
                 std::process::exit(1);
             });
             let source = commands::read_file(input);
             let ast = commands::check::check_source(&source, input);
-            commands::build::run(input, &ast, opt_level);
+            commands::build::build_ts(input, &ast);
         }
         "run" => {
             let input = positional.get(1).copied().unwrap_or_else(|| {
@@ -66,12 +66,16 @@ fn main() {
             });
             let source = commands::read_file(input);
             let ast = commands::check::check_source(&source, input);
-            commands::run::run(input, &ast, opt_level);
+            if flags.contains(&"--ts") {
+                commands::run::run_ts(input, &ast);
+            } else {
+                commands::run::run_zig(input, &ast, opt_level);
+            }
         }
         "clean" => commands::clean::run(),
         _ => {
             eprintln!(
-                "Usage: zyre <run|build|check|clean> [file.zy] [--release[=safe|fast|small]]"
+                "Usage: zyre <run|build|check|clean> [file.zy] [--ts] [--release[=safe|fast|small]]"
             );
             std::process::exit(1);
         }

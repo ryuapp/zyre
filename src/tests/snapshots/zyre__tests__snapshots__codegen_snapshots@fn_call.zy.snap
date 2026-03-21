@@ -1,6 +1,5 @@
 ---
 source: src/tests/snapshots.rs
-assertion_line: 10
 expression: output
 input_file: src/tests/fixtures/fn_call.zy
 ---
@@ -21,5 +20,5 @@ pub fn main() !void {
     const __zyre_allocator = __zyre_arena.allocator();
     _ = __zyre_allocator;
 
-    __zyre_std_debug.print(add(1, 2));
+    __zyre_std_debug.print(.{add(1, 2)});
 }

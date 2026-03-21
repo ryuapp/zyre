@@ -19,6 +19,9 @@ jobs:
       - uses: mlugg/setup-zig@v2
         with:
           version: "0.15.2"
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
       - run: cargo fmt --check
       - run: cargo build
       - run: cargo test

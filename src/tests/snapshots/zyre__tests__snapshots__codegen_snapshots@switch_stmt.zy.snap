@@ -1,6 +1,5 @@
 ---
 source: src/tests/snapshots.rs
-assertion_line: 10
 expression: output
 input_file: src/tests/fixtures/switch_stmt.zy
 ---
@@ -11,9 +10,9 @@ const __zyre_std_fs = @import("zyre_std_fs.zig");
 
 fn check(n: i32) void {
     switch (n) {
-    1 => __zyre_std_debug.print("one"),
-    2 => __zyre_std_debug.print("two"),
-    else => __zyre_std_debug.print("other"),
+    1 => __zyre_std_debug.print(.{"one"}),
+    2 => __zyre_std_debug.print(.{"two"}),
+    else => __zyre_std_debug.print(.{"other"}),
 }
 }
 

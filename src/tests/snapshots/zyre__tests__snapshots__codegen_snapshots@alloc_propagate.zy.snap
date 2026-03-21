@@ -1,6 +1,5 @@
 ---
 source: src/tests/snapshots.rs
-assertion_line: 10
 expression: output
 input_file: src/tests/fixtures/alloc_propagate.zy
 ---
@@ -23,5 +22,5 @@ pub fn main() !void {
     const data = readIt(__zyre_allocator) catch {
     return;
 };
-    __zyre_std_debug.print(data);
+    __zyre_std_debug.print(.{data});
 }
